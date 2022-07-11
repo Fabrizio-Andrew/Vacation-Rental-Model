@@ -37,7 +37,7 @@ if __name__ == '__main__':
     # Save the model to location specified by args.model_dir
     joblib.dump(model, os.path.join(args.model_dir, "model.joblib"))
 
-def model_fn(model_dir):
+def model_fn(model_dir):  # Could this be implemented in such a way to not call model.joblib?
     """
     Loads the model that was saved at the end of the __main__ block to be used
     by the predict_fn function below.
@@ -62,7 +62,7 @@ def predict_fn(input_data, model):
     """
     Makes a prediction on the data formatted by input_fn.
     """
-    return model.predict(input_data)
+    return model.predict(input_data) # I could just hard-code the dot matrix here.
 
 #def output_fn(prediction, content_type):
     """
