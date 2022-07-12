@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 import os
 import pandas as pd
-from sklearn.externals import joblib
+import joblib
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -18,31 +18,26 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # This is where I would load data and train if I had data...
+# This is where I would load data and train if I had data...
 
-    #data = pd.read_csv(os.path.join(args.train, 'train.csv'), index_col=0, engine='python')
+# Set the model via coefs and intercept (Instead of training it)
+lm = LinearRegression()
+lm.intercept_ = 0.12633143197779734
+lm.coef_ = [-0.18180501, -0.32107893, -0.36701204, -0.15250934, -0.05541475,
+    -0.03938244,  0.55789099,  0.01080494,  0.10483031,  0.25154944,
+        0.39175801]
 
-    #train_X = data[[c for c in data.columns if c != 'label']]
-    #train_Y = data[['label']]
+# Save the model to location specified by args.model_dir
+with open('model.joblib', 'wb') as f:
+    joblib.dump(lm,f)
 
-    #train_Y_enc = train_Y['label'].map(LABEL_TO_INDEX)
-
-    # Set the model via coefs and intercept (Instead of training it)
-    model = LinearRegression()
-    model.intercept_ = 0.12633143197779734
-    model.coef_ = [-0.18180501, -0.32107893, -0.36701204, -0.15250934, -0.05541475,
-        -0.03938244,  0.55789099,  0.01080494,  0.10483031,  0.25154944,
-            0.39175801]
-
-    # Save the model to location specified by args.model_dir
-    joblib.dump(model, os.path.join(args.model_dir, "model.joblib"))
-
-def model_fn(model_dir):  # Could this be implemented in such a way to not call model.joblib?
+def model_fn(model_dir):
     """
     Loads the model that was saved at the end of the __main__ block to be used
     by the predict_fn function below.
     """
     model = joblib.load(os.path.join(model_dir, 'model.joblib'))
+
     return model
 
 def input_fn(request_body, request_content_type):
@@ -62,7 +57,7 @@ def predict_fn(input_data, model):
     """
     Makes a prediction on the data formatted by input_fn.
     """
-    return model.predict(input_data) # I could just hard-code the dot matrix here.
+    return model.predict(input_data)
 
 #def output_fn(prediction, content_type):
     """
