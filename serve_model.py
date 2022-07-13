@@ -3,6 +3,7 @@ import numpy as np
 import os
 import pandas as pd
 import joblib
+import json
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -23,9 +24,9 @@ if __name__ == '__main__':
 # Set the model via coefs and intercept (Instead of training it)
 lm = LinearRegression()
 lm.intercept_ = 0.12633143197779734
-lm.coef_ = [-0.18180501, -0.32107893, -0.36701204, -0.15250934, -0.05541475,
+lm.coef_ = np.array([-0.18180501, -0.32107893, -0.36701204, -0.15250934, -0.05541475,
     -0.03938244,  0.55789099,  0.01080494,  0.10483031,  0.25154944,
-        0.39175801]
+        0.39175801])
 
 # Save the model to location specified by args.model_dir
 with open('model.joblib', 'wb') as f:
@@ -44,20 +45,21 @@ def input_fn(request_body, request_content_type):
     """
     Formats a request body as a numpy array that is sent to the deployed model.
     """
-    if request_content_type == 'text/csv':
-        samples = []
-        for r in request_body.split('|'):
-            samples.append(list(map(float,r.split(','))))
-        return np.array(samples)
+    if request_content_type == 'application/json':
+        request_body = json.loads(request_body)
+        inpVars = request_body['Input']
+        print("INPUT: " + str(inpVars))
+        return inpVars
     else:
-        raise ValueError('This model only supports text/csv input.')
+        raise ValueError('This model only supports application/json input.')
 
 
 def predict_fn(input_data, model):
     """
     Makes a prediction on the data formatted by input_fn.
     """
-    return model.predict(input_data)
+    output = np.dot(input_data, model.coef_) + model.intercept_
+    return output
 
 #def output_fn(prediction, content_type):
     """
