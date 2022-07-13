@@ -60,9 +60,3 @@ def predict_fn(input_data, model):
     """
     output = np.dot(input_data, model.coef_) + model.intercept_
     return output
-
-#def output_fn(prediction, content_type):
-    """
-    Reformats prediction result from predict_fn to create the API call response.
-    """
-#    return '|'.join([INDEX_TO_LABEL[t] for t in prediction])
